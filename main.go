@@ -14,13 +14,22 @@ const (
 )
 
 var (
-	log *logger.Logger
+	log    *logger.Logger
+	result Result
 )
 
 func init() {
 	log, _ = logger.New("stdout")
 	log.SetColor(true)
 	log.SetFlag(3)
+
+	data, err := exec.Command("uname", "-a").Output()
+	if err != nil {
+		log.Errorf("exec.Command(uname -a): %v\n", err)
+		return
+	}
+
+	result.System = strings.TrimSuffix(string(data), "\n")
 }
 
 func main() {

@@ -14,6 +14,11 @@ var (
 	Helper *_Helper
 )
 
+type Result struct {
+	System string     `json:"system"`
+	Disks  []DiskInfo `json:"disks"`
+}
+
 type DiskInfo struct {
 	Name     string  `json:"name"`
 	Capacity float64 `json:"capacity"`
@@ -21,7 +26,7 @@ type DiskInfo struct {
 }
 
 func parseDisk(infos []string) {
-	res := make([]DiskInfo, 0)
+	result.Disks = make([]DiskInfo, 0)
 	for _, v := range infos {
 		fmt.Println("str is : ", v)
 		if strings.HasPrefix(v, "Disk /dev") {
@@ -38,14 +43,14 @@ func parseDisk(infos []string) {
 				continue
 			}
 
-			res = append(res, DiskInfo{
+			result.Disks = append(result.Disks, DiskInfo{
 				Name:     name,
 				Capacity: convertToGB(capacity),
 			})
 		}
 	}
 
-	data, err := json.MarshalIndent(res, "", "  ")
+	data, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
 		log.Errorf("json.Marshal(): %v\n", err)
 		return
