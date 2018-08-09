@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -10,7 +12,9 @@ import (
 )
 
 const (
-	VERSION = "1.0.0"
+	VERSION              = "1.0.0"
+	CommonDiskFromatType = "ext4"
+	DiskInfoFileName     = "disk.json"
 )
 
 var (
@@ -30,6 +34,7 @@ func init() {
 	}
 
 	result.System = strings.TrimSuffix(string(data), "\n")
+	result.FormatType = CommonDiskFromatType
 }
 
 func main() {
@@ -74,14 +79,29 @@ func getDiskInfo(log *logger.Logger) cli.ActionFunc {
 			infos := strings.Split(string(data), "\n")
 			parseDisk(infos)
 		}
-
 		return nil
 	}
 }
 
 func diskPartition(log *logger.Logger) cli.ActionFunc {
 	return func(ctx *cli.Context) error {
+		var tmpResult *Result
+		data, err := ioutil.ReadFile(DiskInfoFileName)
+		if err != nil {
+			log.Errorf("ioutil.ReadFile(%v): %v\n", DiskInfoFileName, err)
+			return nil
+		}
 
+		if err := json.Unmarshal(data, &tmpResult); err != nil {
+			log.Errorf("json.Unmarshal(): %v", err)
+			return nil
+		}
+
+		for _, v := range tmpResult.Disks {
+			if !v.Formated {
+				removeAllPartitions(v.Name)
+			}
+		}
 		return nil
 	}
 }

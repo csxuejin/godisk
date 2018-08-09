@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -15,8 +16,9 @@ var (
 )
 
 type Result struct {
-	System string     `json:"system"`
-	Disks  []DiskInfo `json:"disks"`
+	System     string     `json:"system"`
+	FormatType string     `json:"format_type"`
+	Disks      []DiskInfo `json:"disks"`
 }
 
 type DiskInfo struct {
@@ -64,4 +66,13 @@ func parseDisk(infos []string) {
 
 func convertToGB(size float64) float64 {
 	return size / 1024 / 1024 / 1024
+}
+
+func removeAllPartitions(diskName string) {
+	_, err := exec.Command("dd", "if=/dev/zero", "of="+diskName, "count=1", "conv=notrunc").Output()
+	if err != nil {
+		log.Errorf("remove all partitions in %v: %v\n", diskName, err)
+	} else {
+		log.Infof("successfully remove all partitions in disk: %v\n", diskName)
+	}
 }
