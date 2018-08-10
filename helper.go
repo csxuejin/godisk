@@ -68,11 +68,7 @@ func convertToGB(size float64) float64 {
 	return size / 1024 / 1024 / 1024
 }
 
-func removeAllPartitions(diskName string) {
-	_, err := exec.Command("dd", "if=/dev/zero", "of="+diskName, "count=1", "conv=notrunc").Output()
-	if err != nil {
-		log.Errorf("remove all partitions in %v: %v\n", diskName, err)
-	} else {
-		log.Infof("successfully remove all partitions in disk: %v\n", diskName)
-	}
+func removeAllPartitions(diskName string) error {
+	cmd := exec.Command("dd", "if=/dev/zero", "of="+diskName, "count=1", "conv=notrunc")
+	return cmd.Run()
 }
