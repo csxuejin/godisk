@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -69,6 +70,21 @@ func convertToGB(size float64) float64 {
 }
 
 func removeAllPartitions(diskName string) error {
-	cmd := exec.Command("dd", "if=/dev/zero", "of="+diskName, "count=1", "conv=notrunc")
-	return cmd.Run()
+	return exec.Command("dd", "if=/dev/zero", "of="+diskName, "count=1", "conv=notrunc").Run()
+}
+
+func makeNewPartition(diskName string) error {
+	return exec.Command("bash", "-c", `echo -e "o\nn\np\n1\n\n\nw" | fdisk `+diskName).Run()
+}
+
+func formatPartition(deviceName string) error {
+	return exec.Command("bash", "-c", `echo -e "\ny" | mkfs.ext4 `+deviceName).Run()
+}
+
+func createFolder(folerName string) error {
+	return os.MkdirAll(folerName, 0700)
+}
+
+func mountPartitions() error {
+	return exec.Command("mount", "-a").Run()
 }
