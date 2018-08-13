@@ -34,7 +34,7 @@ func parseDisk(infos []string) {
 	devices := make([]string, 0)
 	for _, v := range infos {
 		fmt.Println("str is : ", v)
-		if strings.HasPrefix(v, "Disk /dev") {
+		if strings.HasPrefix(v, "Disk /dev") || strings.HasPrefix(v, "磁盘 /dev") {
 			nameBegin := strings.Index(v, "/dev")
 			nameEnd := strings.Index(v, ":")
 			name := v[nameBegin:nameEnd]
