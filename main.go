@@ -108,7 +108,8 @@ func diskPartition(log *logger.Logger) cli.ActionFunc {
 		fstabContents := make([]FstabContent, 0)
 
 		for _, v := range tmpResult.Disks {
-			if !v.Formated {
+			if v.NeedFormat {
+				log.Infof("now start to format disk %v\n", v.Name)
 				diskName := v.Name
 				deviceName := diskName + "1" // 一块盘只有一个分区
 				folderName := "/disk" + strconv.Itoa(cnt)
@@ -150,6 +151,10 @@ func diskPartition(log *logger.Logger) cli.ActionFunc {
 			}
 		}
 
+		if len(fstabContents) <= 0 {
+			return nil
+		}
+
 		newData := ""
 
 		// step 5: modify /etc/fstab file
@@ -175,7 +180,7 @@ func diskPartition(log *logger.Logger) cli.ActionFunc {
 		}
 
 		for _, dev := range fstabContents {
-			tmp := fmt.Sprintf("%v	%v	ext4	defaults,noatime	0	0\n", dev.DeviceName, dev.FolderName)
+			tmp := fmt.Sprintf("%v	%v	%v	defaults,noatime	0	0\n", dev.DeviceName, dev.FolderName, tmpResult.FormatType)
 			newData = newData + tmp
 		}
 

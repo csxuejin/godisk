@@ -23,9 +23,10 @@ type Result struct {
 }
 
 type DiskInfo struct {
-	Name     string  `json:"name"`
-	Capacity float64 `json:"capacity"`
-	Formated bool    `json:"formated"`
+	Name       string  `json:"name"`
+	Capacity   float64 `json:"capacity"`
+	Formated   bool    `json:"formated"`
+	NeedFormat bool    `json:"need_format"`
 }
 
 func parseDisk(infos []string) {
