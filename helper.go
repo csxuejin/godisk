@@ -17,9 +17,9 @@ var (
 )
 
 type Result struct {
-	System     string     `json:"system"`
-	FormatType string     `json:"format_type"`
-	Disks      []DiskInfo `json:"disks"`
+	System     string      `json:"system"`
+	FormatType string      `json:"format_type"`
+	Disks      []*DiskInfo `json:"disks"`
 }
 
 type DiskInfo struct {
@@ -30,7 +30,8 @@ type DiskInfo struct {
 }
 
 func parseDisk(infos []string) {
-	result.Disks = make([]DiskInfo, 0)
+	result.Disks = make([]*DiskInfo, 0)
+	devices := make([]string, 0)
 	for _, v := range infos {
 		fmt.Println("str is : ", v)
 		if strings.HasPrefix(v, "Disk /dev") {
@@ -47,10 +48,21 @@ func parseDisk(infos []string) {
 				continue
 			}
 
-			result.Disks = append(result.Disks, DiskInfo{
+			result.Disks = append(result.Disks, &DiskInfo{
 				Name:     name,
 				Capacity: convertToGB(capacity),
 			})
+		} else if strings.HasPrefix(v, "/dev") {
+			devices = append(devices, strings.Split(v, " ")[0])
+			fmt.Println("devices is : ", devices)
+		}
+	}
+
+	for _, device := range devices {
+		for _, disk := range result.Disks {
+			if strings.HasPrefix(device, disk.Name) && !disk.Formated {
+				disk.Formated = true
+			}
 		}
 	}
 

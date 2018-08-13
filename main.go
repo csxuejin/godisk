@@ -122,14 +122,14 @@ func diskPartition(log *logger.Logger) cli.ActionFunc {
 				log.Infof("successfully remove all partitions in disk: %v \n", diskName)
 
 				// step 2 : make new partition，the default partition name is 'diskName+1', eg : /dev/vdb1
-				if err := makeNewPartition(diskName); err != nil && !strings.Contains(err.Error(), "127") {
+				if err := makeNewPartition(diskName); err != nil && !strings.Contains(err.Error(), "127") && !strings.Contains(err.Error(), "exit status 1") {
 					log.Errorf("partition disk(%v) failed : %v\n", diskName, err)
 					continue
 				}
 				log.Infof("partition disk(%v) successfully\n", diskName)
 
 				// step 3: format the new partition
-				if err := formatPartition(deviceName); err != nil {
+				if err := formatPartition(deviceName); err != nil && !strings.Contains(err.Error(), "exit status 1") {
 					log.Errorf("mkfs.ext4 %v failed: %v \n", deviceName, err)
 					continue
 				}
