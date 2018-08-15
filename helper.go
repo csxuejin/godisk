@@ -25,11 +25,37 @@ type Result struct {
 type DiskInfo struct {
 	Name       string  `json:"name"`
 	Capacity   float64 `json:"capacity"`
+	DiskType   int     `json:"disk_type"` // 0: SSD, 1: SATA
 	Formated   bool    `json:"formated"`
 	NeedFormat bool    `json:"need_format"`
 }
 
+func getDiskType() map[string]int {
+	data, err := exec.Command("bash", "-c", `lsblk -d -o name,rota`).Output()
+	if err != nil {
+		log.Errorf("exec.Command(lsblk -d -o name,rota): %v\n", err)
+		return nil
+	}
+
+	res := make(map[string]int)
+	disks := strings.Split(string(data), "\n")
+	for i, v := range disks {
+		if i == 0 || v == "" {
+			continue
+		}
+
+		strs := strings.Split(v, " ")
+		num, _ := strconv.Atoi(strs[len(strs)-1])
+		res[strs[0]] = num
+	}
+
+	return res
+}
+
 func parseDisk(infos []string) {
+	diskTypeMap := getDiskType()
+	log.Infof("diskTypeMap: %#v\n", diskTypeMap)
+
 	result.Disks = make([]*DiskInfo, 0)
 	devices := make([]string, 0)
 	bootDevice := ""
@@ -50,7 +76,9 @@ func parseDisk(infos []string) {
 			result.Disks = append(result.Disks, &DiskInfo{
 				Name:     name,
 				Capacity: convertToGB(capacity),
+				DiskType: diskTypeMap[name],
 			})
+
 		} else if strings.HasPrefix(v, "/dev") {
 			deviceName := strings.Split(v, " ")[0]
 			devices = append(devices, deviceName)
