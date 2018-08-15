@@ -77,7 +77,6 @@ func getDiskInfo(log *logger.Logger) cli.ActionFunc {
 		if err != nil {
 			log.Errorf("cmd.CombinedOutput(): %v\n", err)
 		} else {
-			log.Infof("data is : %#v\n", string(data))
 			infos := strings.Split(string(data), "\n")
 			parseDisk(infos)
 		}

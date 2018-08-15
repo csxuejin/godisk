@@ -32,8 +32,8 @@ type DiskInfo struct {
 func parseDisk(infos []string) {
 	result.Disks = make([]*DiskInfo, 0)
 	devices := make([]string, 0)
+	bootDevice := ""
 	for _, v := range infos {
-		fmt.Println("str is : ", v)
 		if strings.HasPrefix(v, "Disk /dev") || strings.HasPrefix(v, "磁盘 /dev") {
 			nameBegin := strings.Index(v, "/dev")
 			nameEnd := strings.Index(v, ":")
@@ -47,14 +47,29 @@ func parseDisk(infos []string) {
 				log.Errorf("strconv.ParseFloat(%v, 64)\n", capacityStr, 64)
 				continue
 			}
-
 			result.Disks = append(result.Disks, &DiskInfo{
 				Name:     name,
 				Capacity: convertToGB(capacity),
 			})
 		} else if strings.HasPrefix(v, "/dev") {
-			devices = append(devices, strings.Split(v, " ")[0])
-			fmt.Println("devices is : ", devices)
+			deviceName := strings.Split(v, " ")[0]
+			devices = append(devices, deviceName)
+			if strings.Contains(v, "*") {
+				bootDevice = deviceName
+				fmt.Println("deivce name is : ", deviceName)
+				fmt.Println("boot device is : ", bootDevice)
+			}
+		}
+	}
+
+	// remove Boot disk from the result
+	if bootDevice != "" {
+		for i, v := range result.Disks {
+			if strings.HasPrefix(bootDevice, v.Name) {
+				fmt.Println("boot disk is ", v.Name)
+				result.Disks = append(result.Disks[:i], result.Disks[i+1:]...)
+				break
+			}
 		}
 	}
 
