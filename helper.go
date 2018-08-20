@@ -54,7 +54,6 @@ func getDiskType() map[string]int {
 
 func parseDisk(infos []string) {
 	diskTypeMap := getDiskType()
-	log.Infof("diskTypeMap: %#v\n", diskTypeMap)
 
 	result.Disks = make([]*DiskInfo, 0)
 	devices := make([]string, 0)
@@ -74,9 +73,10 @@ func parseDisk(infos []string) {
 				continue
 			}
 			result.Disks = append(result.Disks, &DiskInfo{
-				Name:     name,
-				Capacity: convertToGB(capacity),
-				DiskType: diskTypeMap[name],
+				Name:       name,
+				Capacity:   convertToGB(capacity),
+				DiskType:   diskTypeMap[name],
+				NeedFormat: true,
 			})
 
 		} else if strings.HasPrefix(v, "/dev") {
@@ -84,8 +84,6 @@ func parseDisk(infos []string) {
 			devices = append(devices, deviceName)
 			if strings.Contains(v, "*") {
 				bootDevice = deviceName
-				fmt.Println("deivce name is : ", deviceName)
-				fmt.Println("boot device is : ", bootDevice)
 			}
 		}
 	}
@@ -130,7 +128,9 @@ func removeAllPartitions(diskName string) error {
 }
 
 func makeNewPartition(diskName string) error {
-	return exec.Command("bash", "-c", `echo -e "o\nn\np\n1\n\n\nw" | fdisk `+diskName).Run()
+	// bash -c 'parted -a opt /dev/vdb --script mklabel gpt --script mkpart primary 2048s 100%'
+	return exec.Command("bash", "-c", `parted -a opt `+diskName+` --script mklabel gpt --script mkpart primary 2048s 100%`).Run()
+	// return exec.Command("bash", "-c", `echo -e "o\nn\np\n1\n\n\nw" | fdisk `+diskName).Run()
 }
 
 func formatPartition(deviceName string) error {

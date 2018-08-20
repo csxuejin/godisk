@@ -52,12 +52,12 @@ func main() {
 
 	app.Commands = []cli.Command{
 		{
-			Name:   "diskinfo",
+			Name:   "info",
 			Usage:  "get disk info",
 			Action: getDiskInfo(log),
 		},
 		{
-			Name:   "partition",
+			Name:   "part",
 			Usage:  "disk partition",
 			Action: diskPartition(log),
 		},
