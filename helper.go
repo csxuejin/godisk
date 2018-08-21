@@ -128,9 +128,7 @@ func removeAllPartitions(diskName string) error {
 }
 
 func makeNewPartition(diskName string) error {
-	// bash -c 'parted -a opt /dev/vdb --script mklabel gpt --script mkpart primary 2048s 100%'
 	return exec.Command("bash", "-c", `parted -a opt `+diskName+` --script mklabel gpt --script mkpart primary 2048s 100%`).Run()
-	// return exec.Command("bash", "-c", `echo -e "o\nn\np\n1\n\n\nw" | fdisk `+diskName).Run()
 }
 
 func formatPartition(deviceName string) error {
