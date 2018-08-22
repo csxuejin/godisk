@@ -1,4 +1,4 @@
-package main
+package godisk
 
 import (
 	"encoding/json"
@@ -52,7 +52,7 @@ func getDiskType() map[string]int {
 	return res
 }
 
-func parseDisk(infos []string) {
+func parseDisk(infos []string) (data []byte, err error) {
 	diskTypeMap := getDiskType()
 
 	result.Disks = make([]*DiskInfo, 0)
@@ -107,7 +107,7 @@ func parseDisk(infos []string) {
 		}
 	}
 
-	data, err := json.MarshalIndent(result, "", "  ")
+	data, err = json.MarshalIndent(result, "", "  ")
 	if err != nil {
 		log.Errorf("json.Marshal(): %v\n", err)
 		return
@@ -116,6 +116,7 @@ func parseDisk(infos []string) {
 	if err := ioutil.WriteFile("disk.json", data, 0644); err != nil {
 		log.Errorf("ioutil.WriteFile(disk.json): %v\n", err)
 	}
+
 	return
 }
 
