@@ -1,7 +1,6 @@
 package godisk
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os/exec"
@@ -19,7 +18,6 @@ func New() *DiskClient {
 
 const (
 	CommonDiskFromatType = "ext4"
-	DiskInfoFileName     = "/root/godisk/disk.json"
 )
 
 var (
@@ -58,23 +56,15 @@ func (_ *DiskClient) GetDiskInfo() ([]byte, error) {
 	return parseDisk(infos)
 }
 
-func (_ *DiskClient) DiskPartition() ([]byte, error) {
-	var tmpResult *Result
-	data, err := ioutil.ReadFile(DiskInfoFileName)
-	if err != nil {
-		log.Errorf("ioutil.ReadFile(%v): %v\n", DiskInfoFileName, err)
-		return data, err
-	}
-
-	if err := json.Unmarshal(data, &tmpResult); err != nil {
-		log.Errorf("json.Unmarshal(): %v", err)
-		return nil, err
+func (_ *DiskClient) DiskPartition(result *Result) ([]byte, error) {
+	if result == nil {
+		return nil, nil
 	}
 
 	cnt := 1
 	fstabContents := make([]FstabContent, 0)
 
-	for _, v := range tmpResult.Disks {
+	for _, v := range result.Disks {
 		if v.NeedFormat {
 			log.Infof("now start to format disk %v\n", v.Name)
 			diskName := v.Name
@@ -125,7 +115,7 @@ func (_ *DiskClient) DiskPartition() ([]byte, error) {
 	newData := ""
 
 	// step 5: modify /etc/fstab file
-	data, err = ioutil.ReadFile("/etc/fstab")
+	data, err := ioutil.ReadFile("/etc/fstab")
 	if err != nil {
 		log.Errorf("ioutil.ReadFile(/etc/fstab): %v\n", err)
 	}
@@ -147,7 +137,7 @@ func (_ *DiskClient) DiskPartition() ([]byte, error) {
 	}
 
 	for _, dev := range fstabContents {
-		tmp := fmt.Sprintf("%v	%v	%v	defaults,noatime	0	0\n", dev.DeviceName, dev.FolderName, tmpResult.FormatType)
+		tmp := fmt.Sprintf("%v	%v	%v	defaults,noatime	0	0\n", dev.DeviceName, dev.FolderName, result.FormatType)
 		newData = newData + tmp
 	}
 
