@@ -123,6 +123,10 @@ func (_ *DiskClient) DiskPartitioDiskPartitionn(result *Result) error {
 	}
 
 	for _, v := range strings.Split(string(data), "\n") {
+		if len(v) == 0 {
+			continue
+		}
+
 		exist := false
 		if !strings.HasPrefix(v, "#") {
 			for _, dev := range fstabContents {
