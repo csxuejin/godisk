@@ -56,9 +56,9 @@ func (_ *DiskClient) GetDiskInfo() ([]byte, error) {
 	return parseDisk(infos)
 }
 
-func (_ *DiskClient) DiskPartitioDiskPartitionn(result *Result) ([]byte, error) {
+func (_ *DiskClient) DiskPartitioDiskPartitionn(result *Result) error {
 	if result == nil {
-		return nil, nil
+		return nil
 	}
 
 	cnt := 1
@@ -109,7 +109,7 @@ func (_ *DiskClient) DiskPartitioDiskPartitionn(result *Result) ([]byte, error) 
 	}
 
 	if len(fstabContents) <= 0 {
-		return nil, nil
+		return nil
 	}
 
 	newData := ""
@@ -118,6 +118,7 @@ func (_ *DiskClient) DiskPartitioDiskPartitionn(result *Result) ([]byte, error) 
 	data, err := ioutil.ReadFile("/etc/fstab")
 	if err != nil {
 		log.Errorf("ioutil.ReadFile(/etc/fstab): %v\n", err)
+		return err
 	}
 
 	for _, v := range strings.Split(string(data), "\n") {
@@ -143,16 +144,16 @@ func (_ *DiskClient) DiskPartitioDiskPartitionn(result *Result) ([]byte, error) 
 
 	if err := ioutil.WriteFile("/etc/fstab", []byte(newData), 0644); err != nil {
 		log.Errorf("ioutil.WriteFile(/etc/fstab): %v", 0644)
-		return nil, nil
+		return err
 	}
 	log.Infof("write /etc/fstab successfully!\n")
 
 	// step 6: exec mount command
 	if err := mountPartitions(); err != nil {
 		log.Errorf("mountPartitions(): %v\n", err)
-		return nil, nil
+		return err
 	}
 	log.Infof("mount partitions successfully!\n")
 
-	return nil, nil
+	return nil
 }
