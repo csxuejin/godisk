@@ -69,7 +69,6 @@ func (_ *DiskClient) DiskPartitioDiskPartitionn(result *Result) error {
 			log.Infof("now start to format disk %v\n", v.Name)
 			diskName := v.Name
 			deviceName := diskName + "1" // 一块盘只有一个分区
-			folderName := "/disk" + strconv.Itoa(cnt)
 
 			// step 1 : remove all partitions
 			if err := removeAllPartitions(diskName); err != nil {
@@ -93,6 +92,8 @@ func (_ *DiskClient) DiskPartitioDiskPartitionn(result *Result) error {
 			log.Infof("mkfs.ext4 %v successfully! \n", deviceName)
 
 			// step 4: create folder to mount
+			// TODO: check whether the folder already exists or not
+			folderName := "/disk" + strconv.Itoa(cnt)
 			if err := createFolder(folderName); err != nil {
 				log.Infof("createFolder %v failed: %v\n", folderName, err)
 				continue

@@ -124,7 +124,28 @@ func convertToGB(size float64) float64 {
 	return size / 1024 / 1024 / 1024
 }
 
+func getMountInfo() ([]string, error) {
+	data, err := exec.Command("df").Output()
+	if err != nil {
+		log.Errorf("exec df failed: %v\n", err)
+		return nil, err
+	}
+
+	infos := strings.Split(string(data), "\n")
+	return infos, nil
+}
+
 func removeAllPartitions(diskName string) error {
+	mountInfo, err := getMountInfo()
+	if err == nil {
+		for _, v := range mountInfo {
+			args := strings.Split(v, " ")
+			if len(args) > 1 && strings.HasPrefix(args[0], diskName) {
+				exec.Command("umount", args[0]).Run()
+			}
+		}
+	}
+
 	return exec.Command("dd", "if=/dev/zero", "of="+diskName, "count=1", "conv=notrunc").Run()
 }
 
