@@ -3,7 +3,6 @@ package godisk
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strconv"
@@ -111,10 +110,6 @@ func parseDisk(infos []string) (data []byte, err error) {
 	if err != nil {
 		log.Errorf("json.Marshal(): %v\n", err)
 		return
-	}
-
-	if err := ioutil.WriteFile("disk.json", data, 0644); err != nil {
-		log.Errorf("ioutil.WriteFile(disk.json): %v\n", err)
 	}
 
 	return
