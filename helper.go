@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -15,18 +16,30 @@ var (
 	Helper *_Helper
 )
 
-type Result struct {
-	System     string      `json:"system"`
-	FormatType string      `json:"format_type"`
-	Disks      []*DiskInfo `json:"disks"`
-}
-
 type DiskInfo struct {
 	Name       string  `json:"name"`
 	Capacity   float64 `json:"capacity"`
 	DiskType   int     `json:"disk_type"` // 0: SSD, 1: SATA
 	Formated   bool    `json:"formated"`
 	NeedFormat bool    `json:"need_format"`
+}
+
+type DiskInfos []*DiskInfo
+
+func (s DiskInfos) Len() int {
+	return len(s)
+}
+func (s DiskInfos) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+func (s DiskInfos) Less(i, j int) bool {
+	return s[i].DiskType < s[j].DiskType
+}
+
+type Result struct {
+	System     string    `json:"system"`
+	FormatType string    `json:"format_type"`
+	Disks      DiskInfos `json:"disks"`
 }
 
 func getDiskType() map[string]int {
@@ -105,6 +118,8 @@ func parseDisk(infos []string) (data []byte, err error) {
 			}
 		}
 	}
+
+	sort.Sort(result.Disks)
 
 	data, err = json.MarshalIndent(result, "", "  ")
 	if err != nil {
