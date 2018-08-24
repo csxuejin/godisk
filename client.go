@@ -27,7 +27,7 @@ var (
 
 func init() {
 	log, _ = logger.New("stdout")
-	log.SetColor(true)
+	log.SetColor(false) // DO NOT set to be true which will cause ansible terminal error.
 	log.SetFlag(3)
 
 	data, err := exec.Command("uname", "-a").Output()
