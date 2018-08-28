@@ -164,7 +164,7 @@ func makeNewPartition(diskName string) error {
 }
 
 func formatPartition(deviceName string) error {
-	return exec.Command("bash", "-c", `echo -e "\ny" | mkfs.ext4 `+deviceName).Run()
+	return exec.Command("mkfs.ext4", "-F", deviceName).Run()
 }
 
 func createFolder(folerName string) error {
