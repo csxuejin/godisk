@@ -56,7 +56,7 @@ func (_ *DiskClient) GetDiskInfo() ([]byte, error) {
 	return parseDisk(infos)
 }
 
-func (_ *DiskClient) DiskPartitioDiskPartitionn(result *Result) error {
+func (_ *DiskClient) DiskPartition(result *Result) error {
 	if result == nil {
 		return nil
 	}
