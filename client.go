@@ -45,7 +45,7 @@ type FstabContent struct {
 	FolderName string
 }
 
-func (_ *DiskClient) GetDiskInfo() ([]byte, error) {
+func (_ *DiskClient) GetDiskInfo(minSize float64) ([]byte, error) {
 	data, err := exec.Command("fdisk", "-l").Output()
 	if err != nil {
 		log.Errorf("fdisk -l: %v\n", err)
@@ -53,7 +53,7 @@ func (_ *DiskClient) GetDiskInfo() ([]byte, error) {
 	}
 
 	infos := strings.Split(string(data), "\n")
-	return parseDisk(infos)
+	return parseDisk(infos, minSize)
 }
 
 func (_ *DiskClient) DiskPartition(result *Result) error {

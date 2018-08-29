@@ -2,7 +2,6 @@ package godisk
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"os/exec"
 	"sort"
@@ -64,7 +63,7 @@ func getDiskType() map[string]int {
 	return res
 }
 
-func parseDisk(infos []string) (data []byte, err error) {
+func parseDisk(infos []string, minSize float64) (data []byte, err error) {
 	diskTypeMap := getDiskType()
 
 	result.Disks = make([]*DiskInfo, 0)
@@ -84,12 +83,17 @@ func parseDisk(infos []string) (data []byte, err error) {
 				log.Errorf("strconv.ParseFloat(%v, 64)\n", capacityStr, 64)
 				continue
 			}
-			result.Disks = append(result.Disks, &DiskInfo{
-				Name:       name,
-				Capacity:   convertToGB(capacity),
-				DiskType:   diskTypeMap[name],
-				NeedFormat: true,
-			})
+
+			capacity = convertToGB(capacity)
+
+			if capacity >= minSize {
+				result.Disks = append(result.Disks, &DiskInfo{
+					Name:       name,
+					Capacity:   capacity,
+					DiskType:   diskTypeMap[name],
+					NeedFormat: true,
+				})
+			}
 
 		} else if strings.HasPrefix(v, "/dev") {
 			deviceName := strings.Split(v, " ")[0]
@@ -104,7 +108,6 @@ func parseDisk(infos []string) (data []byte, err error) {
 	if bootDevice != "" {
 		for i, v := range result.Disks {
 			if strings.HasPrefix(bootDevice, v.Name) {
-				fmt.Println("boot disk is ", v.Name)
 				result.Disks = append(result.Disks[:i], result.Disks[i+1:]...)
 				break
 			}
